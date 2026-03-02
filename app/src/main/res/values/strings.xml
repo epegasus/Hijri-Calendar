@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">Hijri Calendar</string>
+
+    <!-- Titles -->
+    <string name="title_islamic_calendar">Islamic Calendar</string>
+
+    <!-- Toolbar actions -->
+    <string name="action_calendar_settings">Filters</string>
+
+    <!-- Content descriptions -->
+    <string name="content_description_location">Current location</string>
+    <string name="content_description_refresh_location">Refresh location</string>
+    <string name="content_description_previous_month">Previous month</string>
+    <string name="content_description_next_month">Next month</string>
+
+    <!-- Static location (no GPS) -->
+    <string name="static_location">Bahria Town Phase 8, Rawalpindi</string>
+
+    <!-- Weekday labels -->
+    <string name="week_sun">Su</string>
+    <string name="week_mon">Mo</string>
+    <string name="week_tue">Tu</string>
+    <string name="week_wed">We</string>
+    <string name="week_thu">Th</string>
+    <string name="week_fri">Fr</string>
+    <string name="week_sat">Sa</string>
+</resources>

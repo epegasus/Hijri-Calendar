@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Calendar specific colors -->
+    <color name="calendar_accent_green">#1BA36A</color>
+    <color name="calendar_card_background">#F5F7FA</color>
+    <color name="calendar_day_background">#EEF1F5</color>
+</resources>
