@@ -150,32 +150,25 @@ class CalendarViewModel(private val generateMonthCalendar: GenerateMonthCalendar
 
     private fun List<CalendarDay>.toUiModels(selectedDate: LocalDate): List<CalendarDayUiModel> {
         return map { day ->
-            if (day.isEmpty) {
-                CalendarDayUiModel(
-                    gregorianDate = null,
-                    hijriDayLabel = "",
-                    gregorianDayLabel = "",
-                    isSelected = false,
-                    isClickable = false
-                )
-            } else {
-                val gregorian = requireNotNull(day.gregorianDate)
-                val hijri = requireNotNull(day.hijriDate)
-                CalendarDayUiModel(
-                    gregorianDate = gregorian,
-                    hijriDayLabel = "${hijri.day} ھـ",
-                    gregorianDayLabel = gregorian.dayOfMonth.toString(),
-                    isSelected = gregorian == selectedDate,
-                    isClickable = true
-                )
-            }
+            val gregorian = day.gregorianDate
+            val hijri = day.hijriDate
+            val isCurrent = day.isInCurrentMonth
+
+            CalendarDayUiModel(
+                gregorianDate = gregorian,
+                hijriDayLabel = "${hijri.day} ھـ",
+                gregorianDayLabel = gregorian.dayOfMonth.toString(),
+                isSelected = isCurrent && gregorian == selectedDate,
+                isClickable = isCurrent,
+                isInCurrentMonth = isCurrent
+            )
         }
     }
 
     private fun buildHijriMonthSubtitle(monthCalendar: MonthCalendar): String {
         val distinctMonths = monthCalendar.days
-            .filterNot(CalendarDay::isEmpty)
-            .mapNotNull { it.hijriDate }
+            .filter { it.isInCurrentMonth }
+            .map { it.hijriDate }
             .distinctBy { it.monthName to it.year }
 
         if (distinctMonths.isEmpty()) return ""

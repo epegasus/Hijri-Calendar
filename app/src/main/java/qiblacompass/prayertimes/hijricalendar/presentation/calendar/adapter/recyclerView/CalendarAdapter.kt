@@ -2,7 +2,7 @@ package qiblacompass.prayertimes.hijricalendar.presentation.calendar.adapter.rec
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.core.view.isVisible
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -22,14 +22,24 @@ class CalendarAdapter(private val onDayClicked: (CalendarDayUiModel) -> Unit) : 
         holder.bind(getItem(position))
     }
 
-    inner class DayViewHolder(private val binding: ItemDayBinding) : RecyclerView.ViewHolder(binding.root) {
+    class DayViewHolder(private val binding: ItemDayBinding) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: CalendarDayUiModel) = with(binding) {
             mtvHijriDay.text = item.hijriDayLabel
             mtvGregorianDay.text = item.gregorianDayLabel
 
-            mtvHijriDay.isVisible = item.isClickable
-            mtvGregorianDay.isVisible = item.isClickable
+            val context = root.context
+            val inactiveColor = ContextCompat.getColor(context, R.color.colorTextInActive)
+            val activeGregorianColor = ContextCompat.getColor(context, android.R.color.black)
+            val activeHijriColor = ContextCompat.getColor(context, android.R.color.darker_gray)
+
+            if (item.isInCurrentMonth) {
+                mtvGregorianDay.setTextColor(activeGregorianColor)
+                mtvHijriDay.setTextColor(activeHijriColor)
+            } else {
+                mtvGregorianDay.setTextColor(inactiveColor)
+                mtvHijriDay.setTextColor(inactiveColor)
+            }
 
             root.setBackgroundResource(
                 when {
@@ -40,13 +50,14 @@ class CalendarAdapter(private val onDayClicked: (CalendarDayUiModel) -> Unit) : 
             )
 
             root.isEnabled = item.isClickable
-            root.isClickable = item.isClickable
+            root.isClickable = false
 
+            /*root.isClickable = item.isClickable
             root.setOnClickListener {
                 if (item.isClickable) {
                     onDayClicked(item)
                 }
-            }
+            }*/
         }
     }
 

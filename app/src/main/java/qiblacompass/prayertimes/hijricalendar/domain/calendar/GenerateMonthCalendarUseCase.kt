@@ -24,15 +24,39 @@ class GenerateMonthCalendarUseCase(private val hijriDateConverter: HijriDateConv
         val firstDayOfWeekIndex = dayOfWeekIndex(firstOfMonth.dayOfWeek)
         val totalCells = calculateTotalCells(firstDayOfWeekIndex, daysInMonth)
 
+        val previousMonth = yearMonth.minusMonths(1)
+        val nextMonth = yearMonth.plusMonths(1)
+        val daysInPreviousMonth = previousMonth.lengthOfMonth()
+
         return buildList(capacity = totalCells) {
             for (cellIndex in 0 until totalCells) {
                 val dayOfMonth = cellIndex - firstDayOfWeekIndex + 1
-                if (dayOfMonth in 1..daysInMonth) {
-                    val gregorian = yearMonth.atDay(dayOfMonth)
-                    add(CalendarDay(gregorianDate = gregorian, hijriDate = hijriDateConverter.toHijri(gregorian)))
-                } else {
-                    add(CalendarDay(gregorianDate = null, hijriDate = null))
+
+                val (gregorianDate, isInCurrentMonth) = when {
+                    dayOfMonth in 1..daysInMonth -> {
+                        yearMonth.atDay(dayOfMonth) to true
+                    }
+
+                    dayOfMonth < 1 -> {
+                        // Leading days from previous month
+                        val previousDay = daysInPreviousMonth + dayOfMonth
+                        previousMonth.atDay(previousDay) to false
+                    }
+
+                    else -> {
+                        // Trailing days from next month
+                        val nextDay = dayOfMonth - daysInMonth
+                        nextMonth.atDay(nextDay) to false
+                    }
                 }
+
+                add(
+                    CalendarDay(
+                        gregorianDate = gregorianDate,
+                        hijriDate = hijriDateConverter.toHijri(gregorianDate),
+                        isInCurrentMonth = isInCurrentMonth
+                    )
+                )
             }
         }
     }

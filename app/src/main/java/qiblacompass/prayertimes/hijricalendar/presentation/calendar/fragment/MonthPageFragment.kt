@@ -27,9 +27,7 @@ class MonthPageFragment : Fragment(R.layout.item_month_page) {
 
     private val calendarAdapter by lazy {
         CalendarAdapter { item ->
-            item.gregorianDate?.let { date ->
-                sharedViewModel.processIntent(CalendarIntent.DaySelected(date))
-            }
+            sharedViewModel.processIntent(CalendarIntent.DaySelected(item.gregorianDate))
         }
     }
 
@@ -37,7 +35,6 @@ class MonthPageFragment : Fragment(R.layout.item_month_page) {
         val position = arguments?.getInt(ARG_POSITION) ?: 0
         position - PagerAdapter.INITIAL_POSITION
     }
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

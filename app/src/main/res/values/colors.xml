@@ -7,4 +7,6 @@
     <color name="calendar_accent_green">#1BA36A</color>
     <color name="calendar_card_background">#F5F7FA</color>
     <color name="calendar_day_background">#EEF1F5</color>
+
+    <color name="colorTextInActive">#9A9A9A</color>
 </resources>
