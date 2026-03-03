@@ -1,10 +1,10 @@
 package qiblacompass.prayertimes.hijricalendar
 
-import android.content.Context
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.edit
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -21,7 +21,6 @@ import qiblacompass.prayertimes.hijricalendar.presentation.calendar.fragment.Pag
 import qiblacompass.prayertimes.hijricalendar.presentation.calendar.state.CalendarUiState
 import qiblacompass.prayertimes.hijricalendar.presentation.calendar.viewModel.CalendarViewModel
 import qiblacompass.prayertimes.hijricalendar.presentation.calendar.viewModel.CalendarViewModelFactory
-import androidx.core.content.edit
 
 class MainActivity : AppCompatActivity() {
 
@@ -54,6 +53,7 @@ class MainActivity : AppCompatActivity() {
                     showAdjustHijriDialog()
                     true
                 }
+
                 else -> false
             }
         }
