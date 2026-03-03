@@ -1,53 +1,42 @@
 plugins {
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.android.library)
 }
 
 android {
-    namespace = "qiblacompass.prayertimes.hijricalendar"
+    namespace = "com.pegasus.hijricalendar"
     compileSdk {
+        // Match app module's compileSdk (Android 36 with minorApiLevel)
         version = release(36) {
             minorApiLevel = 1
         }
     }
 
     defaultConfig {
-        applicationId = "qiblacompass.prayertimes.hijricalendar"
         minSdk = 23
-        targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
     }
 
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-        }
+    buildFeatures {
+        viewBinding = true
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
         isCoreLibraryDesugaringEnabled = true
     }
-    buildFeatures {
-        viewBinding = true
-    }
 }
 
 dependencies {
-    // java.time backport for older Android versions
+    // Share desugared java.time and core dependencies with app where needed
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
-    // Core Android & UI
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
 
-    // Architecture components
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
-
-    // Hijri calendar library
-    implementation(project(":hijri-calendar"))
+    implementation(libs.androidx.lifecycle.runtime.ktx)
 }
+

@@ -1,0 +1,17 @@
+<resources>
+
+    <style name="Base.Theme.HijriCalendar" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Calendar-specific styling can be customized here. -->
+    </style>
+
+    <style name="Theme.HijriCalendar" parent="Base.Theme.HijriCalendar" />
+
+    <style name="Widget.WeekDayLabel" parent="Theme.HijriCalendar">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+</resources>

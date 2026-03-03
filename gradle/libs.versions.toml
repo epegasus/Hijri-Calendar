@@ -17,6 +17,7 @@ lifecycle = "2.10.0"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
 
 [libraries]
 # Core AndroidX + UI
@@ -31,3 +32,4 @@ desugar-jdk-libs = { group = "com.android.tools", name = "desugar_jdk_libs", ver
 
 # Lifecycle / ViewModel
 androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }

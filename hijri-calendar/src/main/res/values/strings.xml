@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dialog: Adjust Hijri Date -->
+    <string name="dialog_adjust_hijri_title">Adjust Hijri Date</string>
+    <string name="dialog_adjust_hijri_body">Select the days to adjust dates</string>
+    <string name="dialog_adjust_hijri_cancel">Cancel</string>
+    <string name="dialog_adjust_hijri_save">Save</string>
+
+    <!-- Weekday labels -->
+    <string name="week_sun">Su</string>
+    <string name="week_mon">Mo</string>
+    <string name="week_tue">Tu</string>
+    <string name="week_wed">We</string>
+    <string name="week_thu">Th</string>
+    <string name="week_fri">Fr</string>
+    <string name="week_sat">Sa</string>
+</resources>

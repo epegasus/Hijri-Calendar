@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="HijriCalendarView">
+        <!-- Text colors -->
+        <attr name="hijriCalendarDayTextColor" format="color" />
+        <attr name="hijriCalendarHijriDayTextColor" format="color" />
+        <attr name="hijriCalendarSelectedHijriDayTextColor" format="color" />
+        <attr name="hijriCalendarInactiveDayTextColor" format="color" />
+    </declare-styleable>
+</resources>
