@@ -7,6 +7,12 @@
     <!-- Toolbar actions -->
     <string name="action_calendar_settings">Filters</string>
 
+    <!-- Dialog: Adjust Hijri Date -->
+    <string name="dialog_adjust_hijri_title">Adjust Hijri Date</string>
+    <string name="dialog_adjust_hijri_body">Select the days to adjust dates</string>
+    <string name="dialog_adjust_hijri_cancel">Cancel</string>
+    <string name="dialog_adjust_hijri_save">Save</string>
+
     <!-- Content descriptions -->
     <string name="content_description_location">Current location</string>
     <string name="content_description_refresh_location">Refresh location</string>

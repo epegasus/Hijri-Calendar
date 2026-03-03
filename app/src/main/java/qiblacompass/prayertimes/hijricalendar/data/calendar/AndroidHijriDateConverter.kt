@@ -18,11 +18,18 @@ import java.util.Locale
  */
 class AndroidHijriDateConverter(private val locale: Locale = DEFAULT_LOCALE) : HijriDateConverter {
 
+    /**
+     * User-configurable offset, in days, used to adjust the Hijri date.
+     * For example, -1 will shift the Hijri result back by one day.
+     */
+    var offsetDays: Int = 0
+
     override fun toHijri(date: LocalDate): HijriDate {
+        val adjustedDate = date.plusDays(offsetDays.toLong())
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            fromIslamicCalendar(date)
+            fromIslamicCalendar(adjustedDate)
         } else {
-            fromHijrahDate(date)
+            fromHijrahDate(adjustedDate)
         }
     }
 

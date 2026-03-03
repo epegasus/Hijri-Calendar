@@ -23,9 +23,18 @@ class CalendarViewModel(private val generateMonthCalendar: GenerateMonthCalendar
     private val _uiState = MutableStateFlow(CalendarUiState(isLoading = true))
     val uiState: StateFlow<CalendarUiState> = _uiState.asStateFlow()
 
+    // Today anchor (used for selection highlight)
+    private val today: LocalDate = LocalDate.now()
+    private val todayMonth: YearMonth = YearMonth.from(today)
+
     // Anchors for ViewPager2 page offsets (center page = baseMonth/baseSelectedDate)
-    private var baseMonth: YearMonth = YearMonth.now()
-    private var baseSelectedDate: LocalDate = LocalDate.now()
+    private var baseMonth: YearMonth = todayMonth
+    private var baseSelectedDate: LocalDate = today
+
+    // Header dates (Hijri / Gregorian) shown in the location card.
+    // These are anchored to "today" and do NOT change when paging months.
+    private var headerHijriFullDateText: String = ""
+    private var headerGregorianFullDateText: String = ""
 
     init {
         processIntent(CalendarIntent.Initialize)
@@ -42,14 +51,22 @@ class CalendarViewModel(private val generateMonthCalendar: GenerateMonthCalendar
 
     private fun loadInitial() {
         viewModelScope.launch {
-            val today = LocalDate.now()
-            val month = YearMonth.from(today)
-
-            baseMonth = month
+            baseMonth = todayMonth
             baseSelectedDate = today
 
-            val newState = buildStateFor(month, today)
-            _uiState.value = newState
+            // Compute header dates once, anchored to "today"
+            val monthCalendar = generateMonthCalendar(todayMonth)
+            val hijriToday = monthCalendar.days
+                .firstOrNull { it.gregorianDate == today }
+                ?.hijriDate
+
+            headerHijriFullDateText = hijriToday?.let {
+                "${it.day} ${it.monthName}, ${it.year} ھـ"
+            } ?: ""
+            headerGregorianFullDateText = GREGORIAN_FULL_DATE_FORMATTER.format(today)
+
+            val initialState = buildStateFor(todayMonth, today)
+            _uiState.value = initialState
         }
     }
 
@@ -69,6 +86,32 @@ class CalendarViewModel(private val generateMonthCalendar: GenerateMonthCalendar
      */
     fun setCurrentPage(offset: Int) {
         _uiState.value = stateForOffset(offset)
+    }
+
+    /**
+     * Recalculate header Hijri/Gregorian full date texts based on the
+     * current Hijri converter configuration (e.g. after user adjusts
+     * the Hijri date offset) and today\'s date.
+     */
+    fun refreshHeaderForToday() {
+        viewModelScope.launch {
+            val monthCalendar = generateMonthCalendar(todayMonth)
+            val hijriToday = monthCalendar.days
+                .firstOrNull { it.gregorianDate == today }
+                ?.hijriDate
+
+            headerHijriFullDateText = hijriToday?.let {
+                "${it.day} ${it.monthName}, ${it.year} ھـ"
+            } ?: ""
+            headerGregorianFullDateText = GREGORIAN_FULL_DATE_FORMATTER.format(today)
+
+            _uiState.update { state ->
+                state.copy(
+                    hijriFullDateText = headerHijriFullDateText,
+                    gregorianFullDateText = headerGregorianFullDateText
+                )
+            }
+        }
     }
 
     private fun moveToAdjacentMonth(offsetMonths: Long) {
@@ -96,22 +139,12 @@ class CalendarViewModel(private val generateMonthCalendar: GenerateMonthCalendar
                     uiModel.copy(isSelected = uiModel.gregorianDate == date)
                 }
 
-                val monthCalendar = generateMonthCalendar(state.currentMonth)
-                val hijriForSelected = monthCalendar.days
-                    .firstOrNull { it.gregorianDate == date }
-                    ?.hijriDate
-
-                val hijriFullDateText = hijriForSelected?.let {
-                    "${it.day} ${it.monthName}, ${it.year} ھـ"
-                } ?: state.hijriFullDateText
-
-                val gregorianFullDateText = GREGORIAN_FULL_DATE_FORMATTER.format(date)
-
                 state.copy(
                     selectedDate = date,
                     days = updatedDays,
-                    hijriFullDateText = hijriFullDateText,
-                    gregorianFullDateText = gregorianFullDateText
+                    // Do NOT touch headerHijriFullDateText / headerGregorianFullDateText here.
+                    hijriFullDateText = state.hijriFullDateText,
+                    gregorianFullDateText = state.gregorianFullDateText
                 )
             }
         }
@@ -122,18 +155,9 @@ class CalendarViewModel(private val generateMonthCalendar: GenerateMonthCalendar
         selectedDate: LocalDate
     ): CalendarUiState {
         val monthCalendar = generateMonthCalendar(targetMonth)
-        val hijriForSelected = monthCalendar.days
-            .firstOrNull { it.gregorianDate == selectedDate }
-            ?.hijriDate
-
         val daysUiModels = monthCalendar.days.toUiModels(selectedDate)
         val monthTitle = MONTH_TITLE_FORMATTER.format(targetMonth.atDay(1))
         val hijriMonthSubtitle = buildHijriMonthSubtitle(monthCalendar)
-
-        val hijriFullDateText = hijriForSelected?.let {
-            "${it.day} ${it.monthName}, ${it.year} ھـ"
-        } ?: ""
-        val gregorianFullDateText = GREGORIAN_FULL_DATE_FORMATTER.format(selectedDate)
 
         return CalendarUiState(
             isLoading = false,
@@ -142,8 +166,9 @@ class CalendarViewModel(private val generateMonthCalendar: GenerateMonthCalendar
             monthTitle = monthTitle,
             hijriMonthSubtitle = hijriMonthSubtitle,
             locationText = "Bahria Town Phase 8, Rawalpindi",
-            hijriFullDateText = hijriFullDateText,
-            gregorianFullDateText = gregorianFullDateText,
+            // Keep header full dates anchored to today.
+            hijriFullDateText = headerHijriFullDateText,
+            gregorianFullDateText = headerGregorianFullDateText,
             days = daysUiModels
         )
     }
@@ -153,17 +178,20 @@ class CalendarViewModel(private val generateMonthCalendar: GenerateMonthCalendar
             val gregorian = day.gregorianDate
             val hijri = day.hijriDate
             val isCurrent = day.isInCurrentMonth
+            val isToday = isCurrent && gregorian == today && currentMonthOf(gregorian) == todayMonth
 
             CalendarDayUiModel(
                 gregorianDate = gregorian,
                 hijriDayLabel = "${hijri.day} ھـ",
                 gregorianDayLabel = gregorian.dayOfMonth.toString(),
-                isSelected = isCurrent && gregorian == selectedDate,
+                isSelected = isToday,
                 isClickable = isCurrent,
                 isInCurrentMonth = isCurrent
             )
         }
     }
+
+    private fun currentMonthOf(date: LocalDate): YearMonth = YearMonth.from(date)
 
     private fun buildHijriMonthSubtitle(monthCalendar: MonthCalendar): String {
         val distinctMonths = monthCalendar.days

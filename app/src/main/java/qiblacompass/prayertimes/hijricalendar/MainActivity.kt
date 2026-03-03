@@ -1,5 +1,6 @@
 package qiblacompass.prayertimes.hijricalendar
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -9,6 +10,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import qiblacompass.prayertimes.hijricalendar.data.calendar.AndroidHijriDateConverter
@@ -19,6 +21,7 @@ import qiblacompass.prayertimes.hijricalendar.presentation.calendar.fragment.Pag
 import qiblacompass.prayertimes.hijricalendar.presentation.calendar.state.CalendarUiState
 import qiblacompass.prayertimes.hijricalendar.presentation.calendar.viewModel.CalendarViewModel
 import qiblacompass.prayertimes.hijricalendar.presentation.calendar.viewModel.CalendarViewModelFactory
+import androidx.core.content.edit
 
 class MainActivity : AppCompatActivity() {
 
@@ -36,12 +39,24 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Load persisted Hijri adjustment and apply to converter
+        val adjustment = readHijriAdjustment()
+        dataSource.offsetDays = adjustment
+
         fullScreen()
         setupViewPager()
         initObserver()
 
         binding.topAppBar.setNavigationOnClickListener { }
-        binding.topAppBar.setOnMenuItemClickListener { _ -> true }
+        binding.topAppBar.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.action_calendar_settings -> {
+                    showAdjustHijriDialog()
+                    true
+                }
+                else -> false
+            }
+        }
         binding.mbPreviousMonth.setOnClickListener { binding.vpCalendarMonths.currentItem -= 1 }
         binding.mbNextMonth.setOnClickListener { binding.vpCalendarMonths.currentItem += 1 }
     }
@@ -85,6 +100,41 @@ class MainActivity : AppCompatActivity() {
             return created
         }
 
+    private fun showAdjustHijriDialog() {
+        val options = intArrayOf(-3, -2, -1, 0, 1, 2, 3)
+        val labels = options.map { it.toString() }.toTypedArray()
+        val currentAdjustment = readHijriAdjustment()
+        val currentIndex = options.indexOf(currentAdjustment).takeIf { it >= 0 } ?: 3 // default 0 at index 3
+        var selectedIndex = currentIndex
+
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.dialog_adjust_hijri_title)
+            .setSingleChoiceItems(labels, currentIndex) { _, which ->
+                selectedIndex = which
+            }
+            .setNegativeButton(R.string.dialog_adjust_hijri_cancel, null)
+            .setPositiveButton(R.string.dialog_adjust_hijri_save) { _, _ ->
+                val newAdjustment = options[selectedIndex]
+                saveHijriAdjustment(newAdjustment)
+                dataSource.offsetDays = newAdjustment
+                // Refresh header full date (today) and rebuild state with updated Hijri mapping
+                viewModel.refreshHeaderForToday()
+                val offset = currentPagerPosition - PagerAdapter.INITIAL_POSITION
+                viewModel.setCurrentPage(offset)
+            }
+            .show()
+    }
+
+    private fun readHijriAdjustment(): Int {
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        return prefs.getInt(KEY_HIJRI_ADJUSTMENT, 0)
+    }
+
+    private fun saveHijriAdjustment(value: Int) {
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        prefs.edit { putInt(KEY_HIJRI_ADJUSTMENT, value) }
+    }
+
     private fun initObserver() {
         lifecycleScope.launch { viewModel.uiState.collectLatest { render(it) } }
     }
@@ -97,5 +147,10 @@ class MainActivity : AppCompatActivity() {
             mtvTitleCalendarGregorianMonth.text = state.monthTitle
             mtvBodyCalendarHijriMonth.text = state.hijriMonthSubtitle
         }
+    }
+
+    companion object {
+        private const val PREFS_NAME = "calendar_prefs"
+        private const val KEY_HIJRI_ADJUSTMENT = "hijri_adjustment_days"
     }
 }
