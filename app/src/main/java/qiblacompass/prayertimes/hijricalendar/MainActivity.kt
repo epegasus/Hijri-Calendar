@@ -14,10 +14,8 @@ import kotlinx.coroutines.launch
 import qiblacompass.prayertimes.hijricalendar.data.calendar.AndroidHijriDateConverter
 import qiblacompass.prayertimes.hijricalendar.databinding.ActivityMainBinding
 import qiblacompass.prayertimes.hijricalendar.domain.calendar.GenerateMonthCalendarUseCase
-import qiblacompass.prayertimes.hijricalendar.presentation.calendar.adapter.recyclerView.CalendarAdapter
 import qiblacompass.prayertimes.hijricalendar.presentation.calendar.adapter.pager.PagerAdapter
-import qiblacompass.prayertimes.hijricalendar.presentation.calendar.adapter.pager.PagerHostFragment
-import qiblacompass.prayertimes.hijricalendar.presentation.calendar.intent.CalendarIntent
+import qiblacompass.prayertimes.hijricalendar.presentation.calendar.fragment.PagerHostFragment
 import qiblacompass.prayertimes.hijricalendar.presentation.calendar.state.CalendarUiState
 import qiblacompass.prayertimes.hijricalendar.presentation.calendar.viewModel.CalendarViewModel
 import qiblacompass.prayertimes.hijricalendar.presentation.calendar.viewModel.CalendarViewModelFactory
@@ -29,15 +27,7 @@ class MainActivity : AppCompatActivity() {
     // MVVM
     private val dataSource by lazy { AndroidHijriDateConverter() }
     private val useCase by lazy { GenerateMonthCalendarUseCase(dataSource) }
-    private val viewModel: CalendarViewModel by viewModels { CalendarViewModelFactory(useCase) }
-
-    val adapter by lazy {
-        CalendarAdapter { item ->
-            item.gregorianDate?.let { date ->
-                viewModel.processIntent(CalendarIntent.DaySelected(date))
-            }
-        }
-    }
+    val viewModel: CalendarViewModel by viewModels { CalendarViewModelFactory(useCase) }
 
     private val pagerAdapter by lazy { PagerAdapter(pagerHostFragment) }
 
@@ -69,23 +59,14 @@ class MainActivity : AppCompatActivity() {
     private fun setupViewPager() {
         binding.vpCalendarMonths.apply {
             adapter = pagerAdapter
-            offscreenPageLimit = 1
+            offscreenPageLimit = 3
             setCurrentItem(currentPagerPosition, false)
 
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
-                    val delta = position - currentPagerPosition
                     currentPagerPosition = position
-
-                    when {
-                        delta > 0 -> repeat(delta) {
-                            viewModel.processIntent(CalendarIntent.NextMonth)
-                        }
-
-                        delta < 0 -> repeat(-delta) {
-                            viewModel.processIntent(CalendarIntent.PreviousMonth)
-                        }
-                    }
+                    val offset = position - PagerAdapter.INITIAL_POSITION
+                    viewModel.setCurrentPage(offset)
                 }
             })
         }
@@ -115,8 +96,6 @@ class MainActivity : AppCompatActivity() {
             mtvGregorianFullDate.text = state.gregorianFullDateText
             mtvTitleCalendarGregorianMonth.text = state.monthTitle
             mtvBodyCalendarHijriMonth.text = state.hijriMonthSubtitle
-
-            adapter.submitList(state.days)
         }
     }
 }

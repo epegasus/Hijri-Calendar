@@ -23,6 +23,10 @@ class CalendarViewModel(private val generateMonthCalendar: GenerateMonthCalendar
     private val _uiState = MutableStateFlow(CalendarUiState(isLoading = true))
     val uiState: StateFlow<CalendarUiState> = _uiState.asStateFlow()
 
+    // Anchors for ViewPager2 page offsets (center page = baseMonth/baseSelectedDate)
+    private var baseMonth: YearMonth = YearMonth.now()
+    private var baseSelectedDate: LocalDate = LocalDate.now()
+
     init {
         processIntent(CalendarIntent.Initialize)
     }
@@ -40,9 +44,31 @@ class CalendarViewModel(private val generateMonthCalendar: GenerateMonthCalendar
         viewModelScope.launch {
             val today = LocalDate.now()
             val month = YearMonth.from(today)
+
+            baseMonth = month
+            baseSelectedDate = today
+
             val newState = buildStateFor(month, today)
             _uiState.value = newState
         }
+    }
+
+    /**
+     * Build a complete UI state for "base month + offset".
+     * Used by each ViewPager page to pre-fill its RecyclerView.
+     */
+    fun stateForOffset(offset: Int): CalendarUiState {
+        val targetMonth = baseMonth.plusMonths(offset.toLong())
+        val desiredDay = baseSelectedDate.dayOfMonth.coerceAtMost(targetMonth.lengthOfMonth())
+        val selectedDate = targetMonth.atDay(desiredDay)
+        return buildStateFor(targetMonth, selectedDate)
+    }
+
+    /**
+     * Update the shared state when the primary ViewPager page changes.
+     */
+    fun setCurrentPage(offset: Int) {
+        _uiState.value = stateForOffset(offset)
     }
 
     private fun moveToAdjacentMonth(offsetMonths: Long) {
@@ -167,11 +193,7 @@ class CalendarViewModel(private val generateMonthCalendar: GenerateMonthCalendar
     }
 
     companion object {
-        private val MONTH_TITLE_FORMATTER: DateTimeFormatter =
-            DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault())
-
-        private val GREGORIAN_FULL_DATE_FORMATTER: DateTimeFormatter =
-            DateTimeFormatter.ofPattern("EEE, dd MMM, yyyy", Locale.getDefault())
+        private val MONTH_TITLE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH)
+        private val GREGORIAN_FULL_DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("EEE, dd MMM, yyyy", Locale.ENGLISH)
     }
 }
-

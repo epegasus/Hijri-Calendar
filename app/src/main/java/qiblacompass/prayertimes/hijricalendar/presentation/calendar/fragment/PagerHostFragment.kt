@@ -1,4 +1,4 @@
-package qiblacompass.prayertimes.hijricalendar.presentation.calendar.adapter.pager
+package qiblacompass.prayertimes.hijricalendar.presentation.calendar.fragment
 
 import androidx.fragment.app.Fragment
 
@@ -10,4 +10,3 @@ import androidx.fragment.app.Fragment
  * purely as an adapter host.
  */
 class PagerHostFragment : Fragment()
-
