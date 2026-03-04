@@ -71,7 +71,7 @@ internal class AndroidHijriDateConverter(private val locale: Locale = DEFAULT_LO
     }
 
     private companion object {
-        private val DEFAULT_LOCALE: Locale = Locale("ar", "SA")
+        private val DEFAULT_LOCALE: Locale = Locale.getDefault()
 
         // 0-based to match IslamicCalendar
         private val HIJRI_MONTHS = listOf(
