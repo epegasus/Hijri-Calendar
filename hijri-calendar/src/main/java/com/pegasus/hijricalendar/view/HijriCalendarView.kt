@@ -58,7 +58,7 @@ class HijriCalendarView @JvmOverloads constructor(
         val defaultDisabledBg = R.drawable.bg_calendar_day_empty
         val defaultUnselectedBg = R.drawable.bg_calendar_day_normal
         val defaultSelectedBg = R.drawable.bg_calendar_day_selected
-        val onSurface = MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurface)
+            val onSurface = MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurface)
         val onSurfaceVariant = MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurfaceVariant)
         val onPrimary = MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnPrimary)
 
