@@ -10,5 +10,5 @@
     android:paddingBottom="8dp"
     app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
     app:spanCount="7"
-    tools:itemCount="35"
+    tools:itemCount="42"
     tools:listitem="@layout/item_day" />

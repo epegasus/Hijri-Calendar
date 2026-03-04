@@ -295,7 +295,7 @@ class HijriCalendarView @JvmOverloads constructor(
         val today = LocalDate.now()
         val firstOfMonth = today.withDayOfMonth(1)
 
-        return List(35) { index ->
+        return List(42) { index ->
             val gregorian = firstOfMonth.plusDays(index.toLong())
             val isInCurrentMonth = index in 3..33
             val isSelected = isInCurrentMonth && gregorian.dayOfMonth == today.dayOfMonth
