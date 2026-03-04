@@ -1,3 +1,5 @@
+[![](https://jitpack.io/v/epegasus/Hijri-Calendar.svg)](https://jitpack.io/#epegasus/Hijri-Calendar)
+
 # Hijri Calendar
 
 A reusable Android library that provides a **Hijri (Islamic) calendar** as a single custom view. It shows Gregorian and Hijri dates in a month grid with optional day-offset adjustment and Material 3–friendly styling.
@@ -38,15 +40,14 @@ dependencyResolutionManagement {
 }
 ```
 
-**2. Add the dependency** (app-level `build.gradle` or `build.gradle.kts`):
+**2. Add the dependency** (app-level `build.gradle` or `build.gradle.kts`): Use the latest version: [![](https://jitpack.io/v/epegasus/Hijri-Calendar.svg)](https://jitpack.io/#epegasus/Hijri-Calendar)
+
 
 ```gradle
 dependencies {
-    implementation("com.github.YOUR_GITHUB_USERNAME:HijriCalendar:VERSION")
+    implementation("com.github.epegasus:Hijri-Calendar:1.0.1")
 }
 ```
-
-Replace `YOUR_GITHUB_USERNAME` with your GitHub username and `VERSION` with a git tag (e.g. `1.0.0`) or commit hash.
 
 If your app uses **core library desugaring** for `java.time` on older devices, enable it in the app module:
 
