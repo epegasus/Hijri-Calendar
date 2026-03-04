@@ -17,6 +17,12 @@ A reusable Android library that provides a **Hijri (Islamic) calendar** as a sin
 
 ---
 
+## ScreenShot
+
+<img width="360" height="800" alt="image" src="https://github.com/user-attachments/assets/9fa306c6-0537-4d40-9899-91dd713f32a3" />
+
+---
+
 ## Requirements
 
 - **minSdk:** 23  
