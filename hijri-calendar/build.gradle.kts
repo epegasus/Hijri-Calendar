@@ -4,12 +4,7 @@ plugins {
 
 android {
     namespace = "com.pegasus.hijricalendar"
-    compileSdk {
-        // Match app module's compileSdk (Android 36 with minorApiLevel)
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 23
