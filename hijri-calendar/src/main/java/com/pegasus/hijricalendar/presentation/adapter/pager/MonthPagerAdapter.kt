@@ -7,13 +7,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.pegasus.hijricalendar.R
 import com.pegasus.hijricalendar.presentation.adapter.recyclerview.CalendarAdapter
 import com.pegasus.hijricalendar.presentation.intent.CalendarIntent
-import com.pegasus.hijricalendar.presentation.model.CalendarColors
+import com.pegasus.hijricalendar.presentation.model.CalendarDayStyleConfig
 import com.pegasus.hijricalendar.presentation.model.CalendarDayUiModel
 import com.pegasus.hijricalendar.presentation.viewmodel.CalendarViewModel
 
 internal class MonthPagerAdapter(
     private val viewModel: CalendarViewModel,
-    private val colors: CalendarColors
+    private val dayStyleConfig: CalendarDayStyleConfig
 ) : RecyclerView.Adapter<MonthPagerAdapter.MonthViewHolder>() {
 
     init {
@@ -25,7 +25,7 @@ internal class MonthPagerAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MonthViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_month_page, parent, false)
         return MonthViewHolder(view).apply {
-            recyclerView.adapter = CalendarAdapter(colors) { item ->
+            recyclerView.adapter = CalendarAdapter(dayStyleConfig) { item ->
                 viewModel.processIntent(CalendarIntent.DaySelected(item.gregorianDate))
             }
         }

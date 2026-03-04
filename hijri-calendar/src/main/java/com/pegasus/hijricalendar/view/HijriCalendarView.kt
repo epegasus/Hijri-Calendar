@@ -19,7 +19,7 @@ import com.pegasus.hijricalendar.databinding.ViewHijriCalendarBinding
 import com.pegasus.hijricalendar.domain.calendar.GenerateMonthCalendarUseCase
 import com.pegasus.hijricalendar.presentation.adapter.pager.MonthPagerAdapter
 import com.pegasus.hijricalendar.presentation.listener.HijriCalendarListener
-import com.pegasus.hijricalendar.presentation.model.CalendarColors
+import com.pegasus.hijricalendar.presentation.model.CalendarDayStyleConfig
 import com.pegasus.hijricalendar.presentation.model.HijriCalendarHeader
 import com.pegasus.hijricalendar.presentation.state.CalendarUiState
 import com.pegasus.hijricalendar.presentation.viewmodel.CalendarViewModel
@@ -36,7 +36,7 @@ class HijriCalendarView @JvmOverloads constructor(
 
     private val binding: ViewHijriCalendarBinding = ViewHijriCalendarBinding.inflate(LayoutInflater.from(context), this, true)
 
-    private val colors: CalendarColors
+    private val dayStyleConfig: CalendarDayStyleConfig
 
     private val dataSource = AndroidHijriDateConverter()
     private val useCase = GenerateMonthCalendarUseCase(dataSource)
@@ -46,7 +46,7 @@ class HijriCalendarView @JvmOverloads constructor(
         ViewModelProvider(activity, factory)[CalendarViewModel::class.java]
     }
 
-    private val monthPagerAdapter by lazy { MonthPagerAdapter(viewModel, colors) }
+    private val monthPagerAdapter by lazy { MonthPagerAdapter(viewModel, dayStyleConfig) }
 
     private var currentPagerPosition: Int = MonthPagerAdapter.INITIAL_POSITION
     private var listener: HijriCalendarListener? = null
@@ -54,31 +54,48 @@ class HijriCalendarView @JvmOverloads constructor(
     private var observerStarted: Boolean = false
 
     init {
-        // Resolve default colors from Material 3 theme
+        // Default drawable and color values (preserve existing behavior when attrs not set)
+        val defaultDisabledBg = R.drawable.bg_calendar_day_empty
+        val defaultUnselectedBg = R.drawable.bg_calendar_day_normal
+        val defaultSelectedBg = R.drawable.bg_calendar_day_selected
         val onSurface = MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurface)
         val onSurfaceVariant = MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurfaceVariant)
         val onPrimary = MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnPrimary)
 
-        var activeGregorian = onSurface
-        var activeHijri = onSurfaceVariant
+        var disabledDayBg = defaultDisabledBg
+        var unselectedDayBg = defaultUnselectedBg
+        var selectedDayBg = defaultSelectedBg
+        var disabledGregorian = onSurfaceVariant
+        var disabledHijri = onSurfaceVariant
+        var unselectedGregorian = onSurface
+        var unselectedHijri = onSurfaceVariant
+        var selectedGregorian = onPrimary
         var selectedHijri = onPrimary
-        var inactive = onSurfaceVariant
 
-        // Override via XML attributes if provided
         if (attrs != null) {
             context.withStyledAttributes(attrs, R.styleable.HijriCalendarView, defStyleAttr, 0) {
-                activeGregorian = getColor(R.styleable.HijriCalendarView_hijriCalendarDayTextColor, activeGregorian)
-                activeHijri = getColor(R.styleable.HijriCalendarView_hijriCalendarHijriDayTextColor, activeHijri)
-                selectedHijri = getColor(R.styleable.HijriCalendarView_hijriCalendarSelectedHijriDayTextColor, selectedHijri)
-                inactive = getColor(R.styleable.HijriCalendarView_hijriCalendarInactiveDayTextColor, inactive)
+                disabledDayBg = getResourceId(R.styleable.HijriCalendarView_disabledDayBackground, defaultDisabledBg)
+                unselectedDayBg = getResourceId(R.styleable.HijriCalendarView_unselectedDayBackground, defaultUnselectedBg)
+                selectedDayBg = getResourceId(R.styleable.HijriCalendarView_selectedDayBackground, defaultSelectedBg)
+                disabledGregorian = getColor(R.styleable.HijriCalendarView_disabledGregorianTextColor, onSurfaceVariant)
+                disabledHijri = getColor(R.styleable.HijriCalendarView_disabledHijriTextColor, onSurfaceVariant)
+                unselectedGregorian = getColor(R.styleable.HijriCalendarView_unselectedGregorianTextColor, onSurface)
+                unselectedHijri = getColor(R.styleable.HijriCalendarView_unselectedHijriTextColor, onSurfaceVariant)
+                selectedGregorian = getColor(R.styleable.HijriCalendarView_selectedGregorianTextColor, onPrimary)
+                selectedHijri = getColor(R.styleable.HijriCalendarView_selectedHijriTextColor, onPrimary)
             }
         }
 
-        colors = CalendarColors(
-            activeGregorianTextColor = activeGregorian,
-            activeHijriTextColor = activeHijri,
-            selectedHijriTextColor = selectedHijri,
-            inactiveTextColor = inactive
+        dayStyleConfig = CalendarDayStyleConfig(
+            disabledDayBackgroundRes = disabledDayBg,
+            unselectedDayBackgroundRes = unselectedDayBg,
+            selectedDayBackgroundRes = selectedDayBg,
+            disabledGregorianTextColor = disabledGregorian,
+            disabledHijriTextColor = disabledHijri,
+            unselectedGregorianTextColor = unselectedGregorian,
+            unselectedHijriTextColor = unselectedHijri,
+            selectedGregorianTextColor = selectedGregorian,
+            selectedHijriTextColor = selectedHijri
         )
 
         // Load persisted Hijri adjustment and apply to converter

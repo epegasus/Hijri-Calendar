@@ -60,15 +60,12 @@
 
     </com.google.android.material.card.MaterialCardView>
 
+    <!-- Example: customize day cell appearance via styleable attrs -->
     <com.pegasus.hijricalendar.view.HijriCalendarView
         android:id="@+id/hijriCalendar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        app:hijriCalendarDayTextColor="#000000"
-        app:hijriCalendarHijriDayTextColor="#666666"
-        app:hijriCalendarSelectedHijriDayTextColor="#FFFFFFFF"
-        app:hijriCalendarInactiveDayTextColor="#888888"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/mcvLocation" />

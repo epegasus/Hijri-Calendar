@@ -1,10 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="HijriCalendarView">
-        <!-- Text colors -->
-        <attr name="hijriCalendarDayTextColor" format="color" />
-        <attr name="hijriCalendarHijriDayTextColor" format="color" />
-        <attr name="hijriCalendarSelectedHijriDayTextColor" format="color" />
-        <attr name="hijriCalendarInactiveDayTextColor" format="color" />
+        <!-- Day cell background drawables -->
+        <attr name="disabledDayBackground" format="reference" />
+        <attr name="unselectedDayBackground" format="reference" />
+        <attr name="selectedDayBackground" format="reference" />
+
+        <!-- Disabled state text colors (e.g. days outside current month) -->
+        <attr name="disabledGregorianTextColor" format="color|reference" />
+        <attr name="disabledHijriTextColor" format="color|reference" />
+
+        <!-- Unselected state text colors -->
+        <attr name="unselectedGregorianTextColor" format="color|reference" />
+        <attr name="unselectedHijriTextColor" format="color|reference" />
+
+        <!-- Selected state text colors -->
+        <attr name="selectedGregorianTextColor" format="color|reference" />
+        <attr name="selectedHijriTextColor" format="color|reference" />
     </declare-styleable>
 </resources>
