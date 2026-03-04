@@ -3,6 +3,8 @@ package com.pegasus.hijricalendar.view
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.core.content.edit
 import androidx.core.content.withStyledAttributes
@@ -10,6 +12,8 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -18,8 +22,10 @@ import com.pegasus.hijricalendar.data.AndroidHijriDateConverter
 import com.pegasus.hijricalendar.databinding.ViewHijriCalendarBinding
 import com.pegasus.hijricalendar.domain.calendar.GenerateMonthCalendarUseCase
 import com.pegasus.hijricalendar.presentation.adapter.pager.MonthPagerAdapter
+import com.pegasus.hijricalendar.presentation.adapter.recyclerview.CalendarAdapter
 import com.pegasus.hijricalendar.presentation.listener.HijriCalendarListener
 import com.pegasus.hijricalendar.presentation.model.CalendarDayStyleConfig
+import com.pegasus.hijricalendar.presentation.model.CalendarDayUiModel
 import com.pegasus.hijricalendar.presentation.model.HijriCalendarHeader
 import com.pegasus.hijricalendar.presentation.state.CalendarUiState
 import com.pegasus.hijricalendar.presentation.viewmodel.CalendarViewModel
@@ -58,7 +64,7 @@ class HijriCalendarView @JvmOverloads constructor(
         val defaultDisabledBg = R.drawable.bg_calendar_day_empty
         val defaultUnselectedBg = R.drawable.bg_calendar_day_normal
         val defaultSelectedBg = R.drawable.bg_calendar_day_selected
-            val onSurface = MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurface)
+        val onSurface = MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurface)
         val onSurfaceVariant = MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurfaceVariant)
         val onPrimary = MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnPrimary)
 
@@ -98,11 +104,16 @@ class HijriCalendarView @JvmOverloads constructor(
             selectedHijriTextColor = selectedHijri
         )
 
-        // Load persisted Hijri adjustment and apply to converter
-        val adjustment = readHijriAdjustment()
-        dataSource.offsetDays = adjustment
+        // Design-time preview: skip ViewModel and pager wiring, and render static content.
+        if (isInEditMode) {
+            setupPreview()
+        } else {
+            // Load persisted Hijri adjustment and apply to converter
+            val adjustment = readHijriAdjustment()
+            dataSource.offsetDays = adjustment
 
-        setupViewPager()
+            setupViewPager()
+        }
     }
 
     override fun onAttachedToWindow() {
@@ -161,6 +172,30 @@ class HijriCalendarView @JvmOverloads constructor(
             lastEmittedSelectedDate = date
             listener?.onDateSelected(date)
         }
+    }
+
+    /**
+     * Populate a static preview when rendered in the layout editor.
+     * This avoids ViewModel / FragmentActivity requirements in design mode.
+     */
+    private fun setupPreview() {
+        // Simple header preview
+        binding.mtvTitleCalendarGregorianMonth.text = "March 2026"
+        binding.mtvBodyCalendarHijriMonth.text = "Ramadan/Shawwal 1447"
+
+        // Hide the real pager and show a standalone RecyclerView with dummy data for preview.
+        binding.vpCalendarMonths.visibility = View.GONE
+
+        val previewRecyclerView = RecyclerView(context).apply {
+            id = generateViewId()
+            layoutParams = binding.vpCalendarMonths.layoutParams
+            layoutManager = GridLayoutManager(context, 7)
+            val adapter = CalendarAdapter(dayStyleConfig) { }
+            this.adapter = adapter
+            adapter.submitList(buildPreviewDays())
+        }
+
+        (binding.root as? ViewGroup)?.addView(previewRecyclerView)
     }
 
     // region Public API
@@ -254,6 +289,26 @@ class HijriCalendarView @JvmOverloads constructor(
     private fun saveHijriAdjustment(value: Int) {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         prefs.edit { putInt(KEY_HIJRI_ADJUSTMENT, value) }
+    }
+
+    private fun buildPreviewDays(): List<CalendarDayUiModel> {
+        val today = LocalDate.now()
+        val firstOfMonth = today.withDayOfMonth(1)
+
+        return List(35) { index ->
+            val gregorian = firstOfMonth.plusDays(index.toLong())
+            val isInCurrentMonth = index in 3..33
+            val isSelected = isInCurrentMonth && gregorian.dayOfMonth == today.dayOfMonth
+
+            CalendarDayUiModel(
+                gregorianDate = gregorian,
+                hijriDayLabel = "${(index % 30) + 1} هـ",
+                gregorianDayLabel = gregorian.dayOfMonth.toString(),
+                isSelected = isSelected,
+                isClickable = isInCurrentMonth,
+                isInCurrentMonth = isInCurrentMonth
+            )
+        }
     }
 
     // endregion
